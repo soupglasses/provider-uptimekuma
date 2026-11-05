@@ -83,7 +83,7 @@ func TestNativeResourcesAgainstKuma(t *testing.T) {
 	// Rebuild the CR from Git plus the external identifier, discarding all status.
 	adopted := &api.GameMonitor{ObjectMeta: metav1.ObjectMeta{Name: "adopted", Namespace: "status", UID: "fresh-kubernetes-uid"}}
 	adopted.Spec = game.Spec
-	meta.SetExternalName(adopted, originalID)
+	// Discard both Kubernetes status and the external-name annotation.
 	observation, err := connect(adopted, "uptimekuma_monitor_gamedig").Observe(t.Context(), adopted)
 	if err != nil || !observation.ResourceExists {
 		t.Fatalf("monitor adoption failed: %+v %v", observation, err)

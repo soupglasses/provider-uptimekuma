@@ -75,10 +75,18 @@ kubectl rollout status --namespace crossplane-system deployment/"$revision" --ti
 for resource in providerconfigs gamemonitors httpmonitors statuspages; do
     [[ $(kubectl get crd "$resource.uptimekuma.ops.finnes.dev" --output jsonpath='{.spec.scope}') == Namespaced ]]
 done
-identity=system:serviceaccount:crossplane-system:uptimekuma-provider
-[[ $(kubectl auth can-i --as="$identity" get secret/kuma-credentials --namespace monitoring) == yes ]]
-[[ $(kubectl auth can-i --as="$identity" list secrets --namespace monitoring || true) == no ]]
-[[ $(kubectl auth can-i --as="$identity" get secret/kuma-credentials --namespace default || true) == no ]]
+identity=system:serviceaccount:crossplane-system:uptimekuma-controller
+expect_permission() {
+    expected=$1; shift
+    actual=$(kubectl auth can-i --as="$identity" "$@" 2>/dev/null || true)
+    if [[ "$actual" != "$expected" ]]; then
+        printf 'Expected %s for %s; got %s\n' "$expected" "$*" "$actual" >&2
+        return 1
+    fi
+}
+expect_permission yes get secret/kuma-credentials --namespace monitoring
+expect_permission no list secrets --namespace monitoring
+expect_permission no get secret/kuma-credentials --namespace default
 cat <<CONFIG | kubectl apply --filename -
 apiVersion: uptimekuma.ops.finnes.dev/v1beta1
 kind: ProviderConfig

@@ -33,12 +33,16 @@ func WithSchema(raw []byte, group string) *ujconfig.Provider {
 			r.Kind, r.ShortGroup, r.UseAsync = kind, "", false
 			r.TerraformConversions = []ujconfig.TerraformConversion{numericID{}}
 			r.ExternalName = ujconfig.IdentifierFromProvider
-			r.ExternalName.GetIDFn = func(_ context.Context, name string, _ map[string]any, _ map[string]any) (string, error) {
-				if name == "" {
-					return "0", nil
+			r.ExternalName.GetIDFn = func(ctx context.Context, externalName string, parameters, setup map[string]any) (string, error) {
+				if externalName == "" {
+					return lookupID(ctx, name, parameters, setup)
 				}
-				return name, nil
+				if id, err := strconv.ParseInt(externalName, 10, 64); err != nil || id <= 0 {
+					return "", fmt.Errorf("external identifier must be a positive integer")
+				}
+				return externalName, nil
 			}
+
 			r.ExternalName.SetIdentifierArgumentFn = func(args map[string]any, externalName string) {
 				if externalName != "" {
 					id, err := strconv.ParseInt(externalName, 10, 64)

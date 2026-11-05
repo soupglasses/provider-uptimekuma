@@ -29,9 +29,14 @@ The ProviderConfig contains `endpoint`, `username` (or `usernameSecretRef`) and
 `passwordSecretRef`, whose selector contains `name` and `key`. These are normal Kuma
 login credentials. Prometheus API keys cannot manage monitors or status pages.
 The runtime reads Secrets directly rather than caching the namespace's Secrets.
+Use a separately managed service account and namespaced Role, as in
+`tests/provider.yaml`: Crossplane grants its automatically managed provider service
+accounts broad Secret permissions, independently of the CRDs' scope.
 
-Adopt existing resources with their numeric `crossplane.io/external-name`, retaining
-the same remote IDs and history. Status pages also require their existing `slug`.
+Unbound monitors are adopted by unique name and expected monitor type; pages use
+their unique slug. Ambiguous names fail closed. This recovers ownership even after
+Kubernetes annotations and status are lost, retaining the same remote IDs and history.
+An explicit numeric `crossplane.io/external-name` can disambiguate existing monitors.
 Start adoption with `managementPolicies: [Observe]`. Check observed data, then add
 `Update` after the desired configuration matches. Omit `Delete` to preserve the
 remote resource when a Kubernetes declaration is removed. Resource replacement
