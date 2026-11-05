@@ -1,0 +1,14 @@
+# SPDX-FileCopyrightText: 2026 Sofie Finnes <sofie+git@finnes.dev>
+# SPDX-License-Identifier: MPL-2.0
+bin
+*.log
+examples-generated
+.git
+.github
+README.md
+renovate.json5
+.mise.toml
+kind-test.sh
+build.sh
+package
+__pycache__

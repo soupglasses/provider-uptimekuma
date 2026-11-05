@@ -1,0 +1,834 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.23.0
+  name: httpmonitors.uptimekuma.ops.finnes.dev
+spec:
+  group: uptimekuma.ops.finnes.dev
+  names:
+    categories:
+      - crossplane
+      - managed
+      - uptimekuma
+    kind: HTTPMonitor
+    listKind: HTTPMonitorList
+    plural: httpmonitors
+    singular: httpmonitor
+  scope: Namespaced
+  versions:
+    - additionalPrinterColumns:
+        - jsonPath: .status.conditions[?(@.type=='Synced')].status
+          name: SYNCED
+          type: string
+        - jsonPath: .status.conditions[?(@.type=='Ready')].status
+          name: READY
+          type: string
+        - jsonPath: .metadata.annotations.crossplane\.io/external-name
+          name: EXTERNAL-NAME
+          type: string
+        - jsonPath: .metadata.creationTimestamp
+          name: AGE
+          type: date
+      name: v1alpha1
+      schema:
+        openAPIV3Schema:
+          description: HTTPMonitor is the Schema for the HTTPMonitors API. <no value>
+          properties:
+            apiVersion:
+              description: |-
+                APIVersion defines the versioned schema of this representation of an object.
+                Servers should convert recognized schemas to the latest internal value, and
+                may reject unrecognized values.
+                More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+              type: string
+            kind:
+              description: |-
+                Kind is a string value representing the REST resource this object represents.
+                Servers may infer this from the endpoint the client submits requests to.
+                Cannot be updated.
+                In CamelCase.
+                More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+              type: string
+            metadata:
+              type: object
+            spec:
+              description: HTTPMonitorSpec defines the desired state of HTTPMonitor
+              properties:
+                forProvider:
+                  properties:
+                    acceptedStatusCodes:
+                      description: Accepted HTTP status codes (e.g., ['200-299', '301']). With an empty
+                        list no status code is accepted, so every check fails (or succeeds when `upside_down`
+                        is set).
+                      items:
+                        type: string
+                      type: array
+                    active:
+                      description: Monitor is active
+                      type: boolean
+                    authDomain:
+                      description: NTLM authentication domain
+                      type: string
+                    authMethod:
+                      description: Authentication method
+                      type: string
+                    authWorkstation:
+                      description: NTLM authentication workstation
+                      type: string
+                    basicAuthPassSecretRef:
+                      description: Basic authentication password. Stored in state; use `basic_auth_pass_wo`
+                        to keep it out of state.
+                      properties:
+                        key:
+                          type: string
+                        name:
+                          description: Name of the secret.
+                          type: string
+                      required:
+                        - key
+                        - name
+                      type: object
+                    basicAuthPassWoSecretRef:
+                      description: 'Basic authentication password, write-only: sent to Uptime Kuma on
+                        create and update but never stored in plan or state.11 or OpenTofu 1.11 or later.
+                        Conflicts with `basic_auth_pass`; requires `basic_auth_pass_wo_version`.'
+                      properties:
+                        key:
+                          type: string
+                        name:
+                          description: Name of the secret.
+                          type: string
+                      required:
+                        - key
+                        - name
+                      type: object
+                    basicAuthPassWoVersion:
+                      description: Any value that changes whenever `basic_auth_pass_wo` changes, for example
+                        a counter or a hash of the secret's encrypted source. A change triggers an update
+                        that sends the current `basic_auth_pass_wo`.
+                      type: string
+                    basicAuthUser:
+                      description: Basic authentication username
+                      type: string
+                    body:
+                      description: Request body
+                      type: string
+                    cacheBuster:
+                      description: Enable cache busting for HTTP requests
+                      type: boolean
+                    description:
+                      description: Description
+                      type: string
+                    domainExpiryNotification:
+                      description: Enable domain (WHOIS) expiry notification, independent of TLS certificate
+                        expiry notification (`expiry_notification`)
+                      type: boolean
+                    expiryNotification:
+                      description: Enable certificate expiry notification
+                      type: boolean
+                    headers:
+                      description: Request headers (JSON format)
+                      type: string
+                    httpBodyEncoding:
+                      description: HTTP body encoding
+                      type: string
+                    ignoreTls:
+                      description: Ignore TLS/SSL errors
+                      type: boolean
+                    interval:
+                      description: Heartbeat interval in seconds. Minimum 20. Uptime Kuma 2.5.0 removed
+                        the former 24 day maximum, so no upper bound is enforced.
+                      type: number
+                    ipFamily:
+                      description: IP protocol version used to connect to the target. One of `auto` (default,
+                        selects the family automatically using Happy Eyeballs), `ipv4` or `ipv6`.
+                      type: string
+                    maxRedirects:
+                      description: Maximum number of redirects to follow
+                      type: number
+                    maxRetries:
+                      description: Maximum number of retries
+                      type: number
+                    method:
+                      description: HTTP method
+                      type: string
+                    name:
+                      description: Friendly name
+                      type: string
+                    notificationIds:
+                      description: List of notification IDs
+                      items:
+                        type: number
+                      type: array
+                    oauthAudience:
+                      description: OAuth audience
+                      type: string
+                    oauthAuthMethod:
+                      description: OAuth authentication method
+                      type: string
+                    oauthClientId:
+                      description: OAuth client ID
+                      type: string
+                    oauthClientSecretSecretRef:
+                      description: OAuth client secret. Stored in state; use `oauth_client_secret_wo`
+                        to keep it out of state.
+                      properties:
+                        key:
+                          type: string
+                        name:
+                          description: Name of the secret.
+                          type: string
+                      required:
+                        - key
+                        - name
+                      type: object
+                    oauthClientSecretWoSecretRef:
+                      description: 'OAuth client secret, write-only: sent to Uptime Kuma on create and
+                        update but never stored in plan or state.11 or OpenTofu 1.11 or later. Conflicts
+                        with `oauth_client_secret`; requires `oauth_client_secret_wo_version`.'
+                      properties:
+                        key:
+                          type: string
+                        name:
+                          description: Name of the secret.
+                          type: string
+                      required:
+                        - key
+                        - name
+                      type: object
+                    oauthClientSecretWoVersion:
+                      description: Any value that changes whenever `oauth_client_secret_wo` changes, for
+                        example a counter or a hash of the secret's encrypted source. A change triggers
+                        an update that sends the current `oauth_client_secret_wo`.
+                      type: string
+                    oauthScopes:
+                      description: OAuth scopes
+                      type: string
+                    oauthTokenUrl:
+                      description: OAuth token URL
+                      type: string
+                    parent:
+                      description: Parent monitor ID for hierarchical organization
+                      type: number
+                    proxyId:
+                      description: Proxy ID
+                      type: number
+                    resendInterval:
+                      description: Resend interval in seconds
+                      type: number
+                    retryInterval:
+                      description: Retry interval in seconds. Minimum 20, and like `interval` it has no
+                        upper bound since Uptime Kuma 2.5.0.
+                      type: number
+                    tags:
+                      items:
+                        properties:
+                          tagId:
+                            description: Tag ID
+                            type: number
+                          value:
+                            description: Optional value for this tag
+                            type: string
+                        type: object
+                      type: array
+                    timeout:
+                      description: 'Request timeout in seconds, at least 0.1. Fractional values are supported.
+                        Defaults to 48, the value the Uptime Kuma web UI assigns to a new monitor: 80%
+                        of the default 60 second `interval`. The floor exists because Uptime Kuma treats
+                        0 or less as no timeout being set and substitutes a value derived from `interval`
+                        instead of using it as a timeout. The server enforces no upper bound, but saving
+                        the monitor in the web UI clamps the value to 80% of `interval`, so a monitor
+                        edited there afterwards can come back lowered.'
+                      type: number
+                    tlsCa:
+                      description: TLS CA certificate
+                      type: string
+                    tlsCertSecretRef:
+                      description: TLS client certificate
+                      properties:
+                        key:
+                          type: string
+                        name:
+                          description: Name of the secret.
+                          type: string
+                      required:
+                        - key
+                        - name
+                      type: object
+                    tlsKeySecretRef:
+                      description: TLS client key. Stored in state; use `tls_key_wo` to keep it out of
+                        state.
+                      properties:
+                        key:
+                          type: string
+                        name:
+                          description: Name of the secret.
+                          type: string
+                      required:
+                        - key
+                        - name
+                      type: object
+                    tlsKeyWoSecretRef:
+                      description: 'TLS client key, write-only: sent to Uptime Kuma on create and update
+                        but never stored in plan or state.11 or OpenTofu 1.11 or later. Conflicts with
+                        `tls_key`; requires `tls_key_wo_version`.'
+                      properties:
+                        key:
+                          type: string
+                        name:
+                          description: Name of the secret.
+                          type: string
+                      required:
+                        - key
+                        - name
+                      type: object
+                    tlsKeyWoVersion:
+                      description: Any value that changes whenever `tls_key_wo` changes, for example a
+                        counter or a hash of the secret's encrypted source. A change triggers an update
+                        that sends the current `tls_key_wo`.
+                      type: string
+                    upsideDown:
+                      description: Invert monitor status (treat DOWN as UP and vice versa)
+                      type: boolean
+                    url:
+                      description: URL to monitor
+                      type: string
+                  type: object
+                initProvider:
+                  description: |-
+                    THIS IS A BETA FIELD. It will be honored
+                    unless the Management Policies feature flag is disabled.
+                    InitProvider holds the same fields as ForProvider, with the exception
+                    of Identifier and other resource reference fields. The fields that are
+                    in InitProvider are merged into ForProvider when the resource is created.
+                    The same fields are also added to the terraform ignore_changes hook, to
+                    avoid updating them after creation. This is useful for fields that are
+                    required on creation, but we do not desire to update them after creation,
+                    for example because of an external controller is managing them, like an
+                    autoscaler.
+                  properties:
+                    acceptedStatusCodes:
+                      description: Accepted HTTP status codes (e.g., ['200-299', '301']). With an empty
+                        list no status code is accepted, so every check fails (or succeeds when `upside_down`
+                        is set).
+                      items:
+                        type: string
+                      type: array
+                    active:
+                      description: Monitor is active
+                      type: boolean
+                    authDomain:
+                      description: NTLM authentication domain
+                      type: string
+                    authMethod:
+                      description: Authentication method
+                      type: string
+                    authWorkstation:
+                      description: NTLM authentication workstation
+                      type: string
+                    basicAuthPassSecretRef:
+                      description: Basic authentication password. Stored in state; use `basic_auth_pass_wo`
+                        to keep it out of state.
+                      properties:
+                        key:
+                          type: string
+                        name:
+                          description: Name of the secret.
+                          type: string
+                      required:
+                        - key
+                        - name
+                      type: object
+                    basicAuthPassWoSecretRef:
+                      description: 'Basic authentication password, write-only: sent to Uptime Kuma on
+                        create and update but never stored in plan or state.11 or OpenTofu 1.11 or later.
+                        Conflicts with `basic_auth_pass`; requires `basic_auth_pass_wo_version`.'
+                      properties:
+                        key:
+                          type: string
+                        name:
+                          description: Name of the secret.
+                          type: string
+                      required:
+                        - key
+                        - name
+                      type: object
+                    basicAuthPassWoVersion:
+                      description: Any value that changes whenever `basic_auth_pass_wo` changes, for example
+                        a counter or a hash of the secret's encrypted source. A change triggers an update
+                        that sends the current `basic_auth_pass_wo`.
+                      type: string
+                    basicAuthUser:
+                      description: Basic authentication username
+                      type: string
+                    body:
+                      description: Request body
+                      type: string
+                    cacheBuster:
+                      description: Enable cache busting for HTTP requests
+                      type: boolean
+                    description:
+                      description: Description
+                      type: string
+                    domainExpiryNotification:
+                      description: Enable domain (WHOIS) expiry notification, independent of TLS certificate
+                        expiry notification (`expiry_notification`)
+                      type: boolean
+                    expiryNotification:
+                      description: Enable certificate expiry notification
+                      type: boolean
+                    headers:
+                      description: Request headers (JSON format)
+                      type: string
+                    httpBodyEncoding:
+                      description: HTTP body encoding
+                      type: string
+                    ignoreTls:
+                      description: Ignore TLS/SSL errors
+                      type: boolean
+                    interval:
+                      description: Heartbeat interval in seconds. Minimum 20. Uptime Kuma 2.5.0 removed
+                        the former 24 day maximum, so no upper bound is enforced.
+                      type: number
+                    ipFamily:
+                      description: IP protocol version used to connect to the target. One of `auto` (default,
+                        selects the family automatically using Happy Eyeballs), `ipv4` or `ipv6`.
+                      type: string
+                    maxRedirects:
+                      description: Maximum number of redirects to follow
+                      type: number
+                    maxRetries:
+                      description: Maximum number of retries
+                      type: number
+                    method:
+                      description: HTTP method
+                      type: string
+                    name:
+                      description: Friendly name
+                      type: string
+                    notificationIds:
+                      description: List of notification IDs
+                      items:
+                        type: number
+                      type: array
+                    oauthAudience:
+                      description: OAuth audience
+                      type: string
+                    oauthAuthMethod:
+                      description: OAuth authentication method
+                      type: string
+                    oauthClientId:
+                      description: OAuth client ID
+                      type: string
+                    oauthClientSecretSecretRef:
+                      description: OAuth client secret. Stored in state; use `oauth_client_secret_wo`
+                        to keep it out of state.
+                      properties:
+                        key:
+                          type: string
+                        name:
+                          description: Name of the secret.
+                          type: string
+                      required:
+                        - key
+                        - name
+                      type: object
+                    oauthClientSecretWoSecretRef:
+                      description: 'OAuth client secret, write-only: sent to Uptime Kuma on create and
+                        update but never stored in plan or state.11 or OpenTofu 1.11 or later. Conflicts
+                        with `oauth_client_secret`; requires `oauth_client_secret_wo_version`.'
+                      properties:
+                        key:
+                          type: string
+                        name:
+                          description: Name of the secret.
+                          type: string
+                      required:
+                        - key
+                        - name
+                      type: object
+                    oauthClientSecretWoVersion:
+                      description: Any value that changes whenever `oauth_client_secret_wo` changes, for
+                        example a counter or a hash of the secret's encrypted source. A change triggers
+                        an update that sends the current `oauth_client_secret_wo`.
+                      type: string
+                    oauthScopes:
+                      description: OAuth scopes
+                      type: string
+                    oauthTokenUrl:
+                      description: OAuth token URL
+                      type: string
+                    parent:
+                      description: Parent monitor ID for hierarchical organization
+                      type: number
+                    proxyId:
+                      description: Proxy ID
+                      type: number
+                    resendInterval:
+                      description: Resend interval in seconds
+                      type: number
+                    retryInterval:
+                      description: Retry interval in seconds. Minimum 20, and like `interval` it has no
+                        upper bound since Uptime Kuma 2.5.0.
+                      type: number
+                    tags:
+                      items:
+                        properties:
+                          tagId:
+                            description: Tag ID
+                            type: number
+                          value:
+                            description: Optional value for this tag
+                            type: string
+                        type: object
+                      type: array
+                    timeout:
+                      description: 'Request timeout in seconds, at least 0.1. Fractional values are supported.
+                        Defaults to 48, the value the Uptime Kuma web UI assigns to a new monitor: 80%
+                        of the default 60 second `interval`. The floor exists because Uptime Kuma treats
+                        0 or less as no timeout being set and substitutes a value derived from `interval`
+                        instead of using it as a timeout. The server enforces no upper bound, but saving
+                        the monitor in the web UI clamps the value to 80% of `interval`, so a monitor
+                        edited there afterwards can come back lowered.'
+                      type: number
+                    tlsCa:
+                      description: TLS CA certificate
+                      type: string
+                    tlsCertSecretRef:
+                      description: TLS client certificate
+                      properties:
+                        key:
+                          type: string
+                        name:
+                          description: Name of the secret.
+                          type: string
+                      required:
+                        - key
+                        - name
+                      type: object
+                    tlsKeySecretRef:
+                      description: TLS client key. Stored in state; use `tls_key_wo` to keep it out of
+                        state.
+                      properties:
+                        key:
+                          type: string
+                        name:
+                          description: Name of the secret.
+                          type: string
+                      required:
+                        - key
+                        - name
+                      type: object
+                    tlsKeyWoSecretRef:
+                      description: 'TLS client key, write-only: sent to Uptime Kuma on create and update
+                        but never stored in plan or state.11 or OpenTofu 1.11 or later. Conflicts with
+                        `tls_key`; requires `tls_key_wo_version`.'
+                      properties:
+                        key:
+                          type: string
+                        name:
+                          description: Name of the secret.
+                          type: string
+                      required:
+                        - key
+                        - name
+                      type: object
+                    tlsKeyWoVersion:
+                      description: Any value that changes whenever `tls_key_wo` changes, for example a
+                        counter or a hash of the secret's encrypted source. A change triggers an update
+                        that sends the current `tls_key_wo`.
+                      type: string
+                    upsideDown:
+                      description: Invert monitor status (treat DOWN as UP and vice versa)
+                      type: boolean
+                    url:
+                      description: URL to monitor
+                      type: string
+                  type: object
+                managementPolicies:
+                  default:
+                    - '*'
+                  description: |-
+                    THIS IS A BETA FIELD. It is on by default but can be opted out
+                    through a Crossplane feature flag.
+                    ManagementPolicies specify the array of actions Crossplane is allowed to
+                    take on the managed and external resources.
+                    See the design doc for more information: https://github.com/crossplane/crossplane/blob/499895a25d1a1a0ba1604944ef98ac7a1a71f197/design/design-doc-observe-only-resources.md?plain=1#L223
+                    and this one: https://github.com/crossplane/crossplane/blob/444267e84783136daa93568b364a5f01228cacbe/design/one-pager-ignore-changes.md
+                  items:
+                    description: |-
+                      A ManagementAction represents an action that the Crossplane controllers
+                      can take on an external resource.
+                    enum:
+                      - Observe
+                      - Create
+                      - Update
+                      - Delete
+                      - LateInitialize
+                      - '*'
+                    type: string
+                  type: array
+                providerConfigRef:
+                  default:
+                    kind: ClusterProviderConfig
+                    name: default
+                  description: |-
+                    ProviderConfigReference specifies how the provider that will be used to
+                    create, observe, update, and delete this managed resource should be
+                    configured.
+                  properties:
+                    kind:
+                      description: Kind of the referenced object.
+                      type: string
+                    name:
+                      description: Name of the referenced object.
+                      type: string
+                  required:
+                    - kind
+                    - name
+                  type: object
+                writeConnectionSecretToRef:
+                  description: |-
+                    WriteConnectionSecretToReference specifies the namespace and name of a
+                    Secret to which any connection details for this managed resource should
+                    be written. Connection details frequently include the endpoint, username,
+                    and password required to connect to the managed resource.
+                  properties:
+                    name:
+                      description: Name of the secret.
+                      type: string
+                  required:
+                    - name
+                  type: object
+              required:
+                - forProvider
+              type: object
+              x-kubernetes-validations:
+                - message: spec.forProvider.name is a required parameter
+                  rule: '!(''*'' in self.managementPolicies || ''Create'' in self.managementPolicies ||
+                    ''Update'' in self.managementPolicies) || has(self.forProvider.name) || (has(self.initProvider)
+                    && has(self.initProvider.name))'
+                - message: spec.forProvider.url is a required parameter
+                  rule: '!(''*'' in self.managementPolicies || ''Create'' in self.managementPolicies ||
+                    ''Update'' in self.managementPolicies) || has(self.forProvider.url) || (has(self.initProvider)
+                    && has(self.initProvider.url))'
+            status:
+              description: HTTPMonitorStatus defines the observed state of HTTPMonitor.
+              properties:
+                atProvider:
+                  properties:
+                    acceptedStatusCodes:
+                      description: Accepted HTTP status codes (e.g., ['200-299', '301']). With an empty
+                        list no status code is accepted, so every check fails (or succeeds when `upside_down`
+                        is set).
+                      items:
+                        type: string
+                      type: array
+                    active:
+                      description: Monitor is active
+                      type: boolean
+                    authDomain:
+                      description: NTLM authentication domain
+                      type: string
+                    authMethod:
+                      description: Authentication method
+                      type: string
+                    authWorkstation:
+                      description: NTLM authentication workstation
+                      type: string
+                    basicAuthPassWoVersion:
+                      description: Any value that changes whenever `basic_auth_pass_wo` changes, for example
+                        a counter or a hash of the secret's encrypted source. A change triggers an update
+                        that sends the current `basic_auth_pass_wo`.
+                      type: string
+                    basicAuthUser:
+                      description: Basic authentication username
+                      type: string
+                    body:
+                      description: Request body
+                      type: string
+                    cacheBuster:
+                      description: Enable cache busting for HTTP requests
+                      type: boolean
+                    description:
+                      description: Description
+                      type: string
+                    domainExpiryNotification:
+                      description: Enable domain (WHOIS) expiry notification, independent of TLS certificate
+                        expiry notification (`expiry_notification`)
+                      type: boolean
+                    expiryNotification:
+                      description: Enable certificate expiry notification
+                      type: boolean
+                    headers:
+                      description: Request headers (JSON format)
+                      type: string
+                    httpBodyEncoding:
+                      description: HTTP body encoding
+                      type: string
+                    id:
+                      type: string
+                    ignoreTls:
+                      description: Ignore TLS/SSL errors
+                      type: boolean
+                    interval:
+                      description: Heartbeat interval in seconds. Minimum 20. Uptime Kuma 2.5.0 removed
+                        the former 24 day maximum, so no upper bound is enforced.
+                      type: number
+                    ipFamily:
+                      description: IP protocol version used to connect to the target. One of `auto` (default,
+                        selects the family automatically using Happy Eyeballs), `ipv4` or `ipv6`.
+                      type: string
+                    maxRedirects:
+                      description: Maximum number of redirects to follow
+                      type: number
+                    maxRetries:
+                      description: Maximum number of retries
+                      type: number
+                    method:
+                      description: HTTP method
+                      type: string
+                    name:
+                      description: Friendly name
+                      type: string
+                    notificationIds:
+                      description: List of notification IDs
+                      items:
+                        type: number
+                      type: array
+                    oauthAudience:
+                      description: OAuth audience
+                      type: string
+                    oauthAuthMethod:
+                      description: OAuth authentication method
+                      type: string
+                    oauthClientId:
+                      description: OAuth client ID
+                      type: string
+                    oauthClientSecretWoVersion:
+                      description: Any value that changes whenever `oauth_client_secret_wo` changes, for
+                        example a counter or a hash of the secret's encrypted source. A change triggers
+                        an update that sends the current `oauth_client_secret_wo`.
+                      type: string
+                    oauthScopes:
+                      description: OAuth scopes
+                      type: string
+                    oauthTokenUrl:
+                      description: OAuth token URL
+                      type: string
+                    parent:
+                      description: Parent monitor ID for hierarchical organization
+                      type: number
+                    proxyId:
+                      description: Proxy ID
+                      type: number
+                    resendInterval:
+                      description: Resend interval in seconds
+                      type: number
+                    retryInterval:
+                      description: Retry interval in seconds. Minimum 20, and like `interval` it has no
+                        upper bound since Uptime Kuma 2.5.0.
+                      type: number
+                    tags:
+                      items:
+                        properties:
+                          tagId:
+                            description: Tag ID
+                            type: number
+                          value:
+                            description: Optional value for this tag
+                            type: string
+                        type: object
+                      type: array
+                    timeout:
+                      description: 'Request timeout in seconds, at least 0.1. Fractional values are supported.
+                        Defaults to 48, the value the Uptime Kuma web UI assigns to a new monitor: 80%
+                        of the default 60 second `interval`. The floor exists because Uptime Kuma treats
+                        0 or less as no timeout being set and substitutes a value derived from `interval`
+                        instead of using it as a timeout. The server enforces no upper bound, but saving
+                        the monitor in the web UI clamps the value to 80% of `interval`, so a monitor
+                        edited there afterwards can come back lowered.'
+                      type: number
+                    tlsCa:
+                      description: TLS CA certificate
+                      type: string
+                    tlsKeyWoVersion:
+                      description: Any value that changes whenever `tls_key_wo` changes, for example a
+                        counter or a hash of the secret's encrypted source. A change triggers an update
+                        that sends the current `tls_key_wo`.
+                      type: string
+                    upsideDown:
+                      description: Invert monitor status (treat DOWN as UP and vice versa)
+                      type: boolean
+                    url:
+                      description: URL to monitor
+                      type: string
+                  type: object
+                conditions:
+                  description: Conditions of the resource.
+                  items:
+                    description: A Condition that may apply to a resource.
+                    properties:
+                      lastTransitionTime:
+                        description: |-
+                          LastTransitionTime is the last time this condition transitioned from one
+                          status to another.
+                        format: date-time
+                        type: string
+                      message:
+                        description: |-
+                          A Message containing details about this condition's last transition from
+                          one status to another, if any.
+                        type: string
+                      observedGeneration:
+                        description: |-
+                          ObservedGeneration represents the .metadata.generation that the condition was set based upon.
+                          For instance, if .metadata.generation is currently 12, but the .status.conditions[x].observedGeneration is 9, the condition is out of date
+                          with respect to the current state of the instance.
+                        format: int64
+                        type: integer
+                      reason:
+                        description: A Reason for this condition's last transition from one status to
+                          another.
+                        type: string
+                      status:
+                        description: Status of this condition; is it currently True, False, or Unknown?
+                        type: string
+                      type:
+                        description: |-
+                          Type of this condition. At most one of each condition type may apply to
+                          a resource at any point in time.
+                        type: string
+                    required:
+                      - lastTransitionTime
+                      - reason
+                      - status
+                      - type
+                    type: object
+                  type: array
+                  x-kubernetes-list-map-keys:
+                    - type
+                  x-kubernetes-list-type: map
+                lastHandledReconcileAt:
+                  description: |-
+                    LastHandledReconcileAt holds the value of the most recent
+                    reconcile-requested-at annotation token that the controller has
+                    processed. Users can compare this to the annotation to determine
+                    whether a reconcile request has been handled.
+                  type: string
+                observedGeneration:
+                  description: |-
+                    ObservedGeneration is the latest metadata.generation
+                    which resulted in either a ready state, or stalled due to error
+                    it can not recover from without human intervention.
+                  format: int64
+                  type: integer
+              type: object
+          required:
+            - spec
+          type: object
+      served: true
+      storage: true
+      subresources:
+        status: {}
