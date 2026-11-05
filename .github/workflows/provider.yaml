@@ -1,0 +1,198 @@
+# SPDX-FileCopyrightText: 2026 Sofie Finnes <sofie+git@finnes.dev>
+# SPDX-License-Identifier: MPL-2.0
+name: Provider
+on:
+  pull_request:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: provider-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  provider:
+    timeout-minutes: 35
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: jdx/mise-action@f5be966e4a917d54244728e6a5fdcd1d93a35e6c # v5.2.6
+        with:
+          version: 2026.11.1
+      - name: Test embedded Terraform provider
+        run: |
+          go mod download github.com/breml/terraform-provider-uptimekuma
+          module="$(go list -m -f '{{.Dir}}' github.com/breml/terraform-provider-uptimekuma)"
+          cd "$module"
+          go test -buildvcs=false -p=2 ./...
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4
+        with:
+          driver: docker-container
+      - name: Build cached amd64 controller image
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7
+        with:
+          context: .
+          target: runtime
+          platforms: linux/amd64
+          load: true
+          tags: provider-uptimekuma:amd64-development
+          cache-from: |
+            type=gha,scope=provider-amd64
+            type=gha,scope=provider
+          cache-to: type=gha,mode=max,scope=provider-amd64
+      - name: Build cached arm64 controller image
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7
+        with:
+          context: .
+          target: runtime
+          platforms: linux/arm64
+          load: true
+          tags: provider-uptimekuma:arm64-development
+          cache-from: |
+            type=gha,scope=provider-arm64
+            type=gha,scope=provider
+          cache-to: type=gha,mode=max,scope=provider-arm64
+      - name: Build native package from verified images
+        run: |
+          for arch in amd64 arm64; do
+            crossplane xpkg build --package-root package --embed-runtime-image "provider-uptimekuma:$arch-development" --package-file "/tmp/provider-uptimekuma-$arch.xpkg"
+          done
+      - name: Export cached generated files
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7
+        with:
+          context: .
+          target: generated
+          outputs: type=local,dest=/tmp/uptimekuma-generated
+          cache-from: |
+            type=gha,scope=provider-amd64
+            type=gha,scope=provider
+      - name: Export cached coverage
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7
+        with:
+          context: .
+          target: coverage
+          outputs: type=local,dest=/tmp/coverage
+          cache-from: |
+            type=gha,scope=provider-amd64
+            type=gha,scope=provider
+      - name: Verify generated files are reproducible
+        run: |
+          diff -r package/crds /tmp/uptimekuma-generated/package/crds
+          diff -r apis /tmp/uptimekuma-generated/apis
+          diff -r internal/controller /tmp/uptimekuma-generated/internal/controller
+          diff config/schema.json /tmp/uptimekuma-generated/config/schema.json
+      - name: Exercise embedded native resources against disposable Kuma
+        run: bash tests/run-native.sh
+      - name: Verify native Uptime Kuma reconciliation
+        env:
+          PROVIDER_PACKAGE: /tmp/provider-uptimekuma-amd64.xpkg
+        run: bash kind-test.sh
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with:
+          name: test-results
+          path: |
+            /tmp/coverage/coverage.out
+            /tmp/native-reports
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: provider-package
+          path: /tmp/provider-uptimekuma-*.xpkg
+          if-no-files-found: error
+  publish:
+    timeout-minutes: 10
+    needs: provider
+    if: github.event_name != 'pull_request' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: write
+      packages: write
+    steps:
+      - name: Download verified native package
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh run download "$GITHUB_RUN_ID" --repo "$GITHUB_REPOSITORY" --name provider-package --dir /tmp/release
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: jdx/mise-action@f5be966e4a917d54244728e6a5fdcd1d93a35e6c # v5.2.6
+        with:
+          version: 2026.11.1
+          install_args: aqua:crossplane/cli
+      - name: Select package version
+        id: version
+        env:
+          REF_NAME: ${{ github.ref_name }}
+        run: |
+          version="v0.0.0-${GITHUB_SHA}"
+          release=false
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
+            version="$REF_NAME"
+            release=true
+          elif git diff --name-only "$GITHUB_SHA^" "$GITHUB_SHA" -- .github/release.yaml | grep -q .; then
+            version="$(sed -n 's/^version: //p' .github/release.yaml)"
+            release=true
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "release=$release" >> "$GITHUB_OUTPUT"
+      - name: Validate release version
+        env:
+          RELEASE_VERSION: ${{ steps.version.outputs.version }}
+        if: steps.version.outputs.release == 'true'
+        run: |
+          python3 - <<'PYTHON'
+          import os
+          import re
+          numeric = r"(?:0|[1-9][0-9]*)"
+          identifier = rf"(?:{numeric}|[0-9]*[A-Za-z-][0-9A-Za-z-]*)"
+          version = rf"v{numeric}\.{numeric}\.{numeric}(?:-{identifier}(?:\.{identifier})*)?"
+          if re.fullmatch(version, os.environ["RELEASE_VERSION"]) is None:
+              raise SystemExit("Release tags must be OCI-compatible semantic versions, such as v1.2.3 or v1.2.3-rc.1")
+          PYTHON
+          git merge-base --is-ancestor "$GITHUB_SHA" origin/main
+      - name: Reject an existing release
+        if: steps.version.outputs.release == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          if gh release view "$RELEASE_VERSION" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "Release $RELEASE_VERSION already exists; publish a new version." >&2
+            exit 1
+          fi
+      - name: Publish native Provider package
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PACKAGE_VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          printf '%s' "$GH_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+          version="$PACKAGE_VERSION"
+          crossplane xpkg push --package-files /tmp/release/provider-uptimekuma-amd64.xpkg,/tmp/release/provider-uptimekuma-arm64.xpkg --oci-annotation org.opencontainers.image.revision="$GITHUB_SHA" --oci-annotation org.opencontainers.image.source="https://github.com/$GITHUB_REPOSITORY" "ghcr.io/soupglasses/provider-uptimekuma:$version"
+          anonymous_config=$(mktemp -d)
+          trap 'rm -rf "$anonymous_config"' EXIT
+          if ! docker --config "$anonymous_config" manifest inspect "ghcr.io/soupglasses/provider-uptimekuma:$version" > /tmp/provider-index.json; then
+            echo 'Published package is not anonymously installable; check its GHCR visibility.' >&2
+            exit 1
+          fi
+          jq --exit-status '[.manifests[].platform | .os + "/" + .architecture] | sort == ["linux/amd64", "linux/arm64"]' /tmp/provider-index.json
+      - name: Publish release artifacts
+        if: steps.version.outputs.release == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_VERSION: ${{ steps.version.outputs.version }}
+        working-directory: /tmp/release
+        run: |
+          sha256sum provider-uptimekuma-amd64.xpkg provider-uptimekuma-arm64.xpkg > SHA256SUMS
+          release_args=()
+          if [[ "$RELEASE_VERSION" == *-* ]]; then
+            release_args+=(--prerelease --latest=false)
+          fi
+          gh release create "$RELEASE_VERSION" provider-uptimekuma-amd64.xpkg provider-uptimekuma-arm64.xpkg SHA256SUMS --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --generate-notes "${release_args[@]}"

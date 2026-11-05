@@ -1,0 +1,10 @@
+# SPDX-FileCopyrightText: 2026 Sofie Finnes <sofie+git@finnes.dev>
+# SPDX-License-Identifier: MPL-2.0
+
+apiVersion: meta.pkg.crossplane.io/v1
+kind: Provider
+metadata:
+  name: provider-uptimekuma
+spec:
+  crossplane:
+    version: ">=v2.4.0-0"

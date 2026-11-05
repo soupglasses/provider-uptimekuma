@@ -1,0 +1,1 @@
+docker.io/louislam/uptime-kuma:2.5.9@sha256:92eb954ce9a68eca749efe76ef9c6dffe43d23a56ed68f35f3866a29f7108b6e

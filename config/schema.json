@@ -1,0 +1,794 @@
+{
+  "format_version": "1.0",
+  "provider_schemas": {
+    "registry.terraform.io/breml/uptimekuma": {
+      "resource_schemas": {
+        "uptimekuma_monitor_gamedig": {
+          "block": {
+            "attributes": {
+              "active": {
+                "computed": true,
+                "description": "Monitor is active",
+                "optional": true,
+                "required": false,
+                "sensitive": false,
+                "type": "bool"
+              },
+              "description": {
+                "computed": false,
+                "description": "Description",
+                "optional": true,
+                "required": false,
+                "sensitive": false,
+                "type": "string"
+              },
+              "domain_expiry_notification": {
+                "computed": true,
+                "description": "Enable domain (WHOIS) expiry notification, independent of TLS certificate expiry notification (`expiry_notification`)",
+                "optional": true,
+                "required": false,
+                "sensitive": false,
+                "type": "bool"
+              },
+              "game": {
+                "computed": false,
+                "description": "Game type identifier (e.g. minecraft, csgo)",
+                "optional": false,
+                "required": true,
+                "sensitive": false,
+                "type": "string"
+              },
+              "gamedig_given_port_only": {
+                "computed": true,
+                "description": "Use only the given port without auto-detection",
+                "optional": true,
+                "required": false,
+                "sensitive": false,
+                "type": "bool"
+              },
+              "hostname": {
+                "computed": false,
+                "description": "Game server IP address or hostname",
+                "optional": false,
+                "required": true,
+                "sensitive": false,
+                "type": "string"
+              },
+              "id": {
+                "computed": true,
+                "description": "Monitor identifier",
+                "optional": false,
+                "required": false,
+                "sensitive": false,
+                "type": "number"
+              },
+              "interval": {
+                "computed": true,
+                "description": "Heartbeat interval in seconds. Minimum 20. Uptime Kuma 2.5.0 removed the former 24 day maximum, so no upper bound is enforced.",
+                "optional": true,
+                "required": false,
+                "sensitive": false,
+                "type": "number"
+              },
+              "max_retries": {
+                "computed": true,
+                "description": "Maximum number of retries",
+                "optional": true,
+                "required": false,
+                "sensitive": false,
+                "type": "number"
+              },
+              "name": {
+                "computed": false,
+                "description": "Friendly name",
+                "optional": false,
+                "required": true,
+                "sensitive": false,
+                "type": "string"
+              },
+              "notification_ids": {
+                "computed": false,
+                "description": "List of notification IDs",
+                "optional": true,
+                "required": false,
+                "sensitive": false,
+                "type": [
+                  "list",
+                  "number"
+                ]
+              },
+              "parent": {
+                "computed": false,
+                "description": "Parent monitor ID for hierarchical organization",
+                "optional": true,
+                "required": false,
+                "sensitive": false,
+                "type": "number"
+              },
+              "port": {
+                "computed": false,
+                "description": "Game server port",
+                "optional": false,
+                "required": true,
+                "sensitive": false,
+                "type": "number"
+              },
+              "resend_interval": {
+                "computed": true,
+                "description": "Resend interval in seconds",
+                "optional": true,
+                "required": false,
+                "sensitive": false,
+                "type": "number"
+              },
+              "retry_interval": {
+                "computed": true,
+                "description": "Retry interval in seconds. Minimum 20, and like `interval` it has no upper bound since Uptime Kuma 2.5.0.",
+                "optional": true,
+                "required": false,
+                "sensitive": false,
+                "type": "number"
+              },
+              "tags": {
+                "computed": false,
+                "description": "Set of tags assigned to this monitor",
+                "nested_type": {
+                  "attributes": {
+                    "tag_id": {
+                      "computed": false,
+                      "description": "Tag ID",
+                      "optional": false,
+                      "required": true,
+                      "sensitive": false,
+                      "type": "number"
+                    },
+                    "value": {
+                      "computed": false,
+                      "description": "Optional value for this tag",
+                      "optional": true,
+                      "required": false,
+                      "sensitive": false,
+                      "type": "string"
+                    }
+                  },
+                  "nesting_mode": "set"
+                },
+                "optional": true,
+                "required": false,
+                "sensitive": false
+              },
+              "upside_down": {
+                "computed": true,
+                "description": "Invert monitor status (treat DOWN as UP and vice versa)",
+                "optional": true,
+                "required": false,
+                "sensitive": false,
+                "type": "bool"
+              }
+            }
+          },
+          "version": 0
+        },
+        "uptimekuma_monitor_http": {
+          "block": {
+            "attributes": {
+              "accepted_status_codes": {
+                "computed": true,
+                "description": "Accepted HTTP status codes (e.g., ['200-299', '301']). With an empty list no status code is accepted, so every check fails (or succeeds when `upside_down` is set).",
+                "optional": true,
+                "required": false,
+                "sensitive": false,
+                "type": [
+                  "list",
+                  "string"
+                ]
+              },
+              "active": {
+                "computed": true,
+                "description": "Monitor is active",
+                "optional": true,
+                "required": false,
+                "sensitive": false,
+                "type": "bool"
+              },
+              "auth_domain": {
+                "computed": false,
+                "description": "NTLM authentication domain",
+                "optional": true,
+                "required": false,
+                "sensitive": false,
+                "type": "string"
+              },
+              "auth_method": {
+                "computed": true,
+                "description": "Authentication method",
+                "optional": true,
+                "required": false,
+                "sensitive": false,
+                "type": "string"
+              },
+              "auth_workstation": {
+                "computed": false,
+                "description": "NTLM authentication workstation",
+                "optional": true,
+                "required": false,
+                "sensitive": false,
+                "type": "string"
+              },
+              "basic_auth_pass": {
+                "computed": false,
+                "description": "Basic authentication password. Stored in state; use `basic_auth_pass_wo` to keep it out of state.",
+                "optional": true,
+                "required": false,
+                "sensitive": true,
+                "type": "string"
+              },
+              "basic_auth_pass_wo": {
+                "computed": false,
+                "description": "Basic authentication password, write-only: sent to Uptime Kuma on create and update but never stored in plan or state. Requires Terraform 1.11 or OpenTofu 1.11 or later. Conflicts with `basic_auth_pass`; requires `basic_auth_pass_wo_version`. An imported resource has no `basic_auth_pass_wo_version` yet, so `terraform import` may store the server's value in `basic_auth_pass` until the next apply with `basic_auth_pass_wo` set removes it from state.",
+                "optional": true,
+                "required": false,
+                "sensitive": true,
+                "type": "string"
+              },
+              "basic_auth_pass_wo_version": {
+                "computed": false,
+                "description": "Any value that changes whenever `basic_auth_pass_wo` changes, for example a counter or a hash of the secret's encrypted source. A change triggers an update that sends the current `basic_auth_pass_wo`.",
+                "optional": true,
+                "required": false,
+                "sensitive": false,
+                "type": "string"
+              },
+              "basic_auth_user": {
+                "computed": false,
+                "description": "Basic authentication username",
+                "optional": true,
+                "required": false,
+                "sensitive": false,
+                "type": "string"
+              },
+              "body": {
+                "computed": false,
+                "description": "Request body",
+                "optional": true,
+                "required": false,
+                "sensitive": false,
+                "type": "string"
+              },
+              "cache_buster": {
+                "computed": true,
+                "description": "Enable cache busting for HTTP requests",
+                "optional": true,
+                "required": false,
+                "sensitive": false,
+                "type": "bool"
+              },
+              "description": {
+                "computed": false,
+                "description": "Description",
+                "optional": true,
+                "required": false,
+                "sensitive": false,
+                "type": "string"
+              },
+              "domain_expiry_notification": {
+                "computed": true,
+                "description": "Enable domain (WHOIS) expiry notification, independent of TLS certificate expiry notification (`expiry_notification`)",
+                "optional": true,
+                "required": false,
+                "sensitive": false,
+                "type": "bool"
+              },
+              "expiry_notification": {
+                "computed": true,
+                "description": "Enable certificate expiry notification",
+                "optional": true,
+                "required": false,
+                "sensitive": false,
+                "type": "bool"
+              },
+              "headers": {
+                "computed": false,
+                "description": "Request headers (JSON format)",
+                "optional": true,
+                "required": false,
+                "sensitive": false,
+                "type": "string"
+              },
+              "http_body_encoding": {
+                "computed": true,
+                "description": "HTTP body encoding",
+                "optional": true,
+                "required": false,
+                "sensitive": false,
+                "type": "string"
+              },
+              "id": {
+                "computed": true,
+                "description": "Monitor identifier",
+                "optional": false,
+                "required": false,
+                "sensitive": false,
+                "type": "number"
+              },
+              "ignore_tls": {
+                "computed": true,
+                "description": "Ignore TLS/SSL errors",
+                "optional": true,
+                "required": false,
+                "sensitive": false,
+                "type": "bool"
+              },
+              "interval": {
+                "computed": true,
+                "description": "Heartbeat interval in seconds. Minimum 20. Uptime Kuma 2.5.0 removed the former 24 day maximum, so no upper bound is enforced.",
+                "optional": true,
+                "required": false,
+                "sensitive": false,
+                "type": "number"
+              },
+              "ip_family": {
+                "computed": true,
+                "description": "IP protocol version used to connect to the target. One of `auto` (default, selects the family automatically using Happy Eyeballs), `ipv4` or `ipv6`.",
+                "optional": true,
+                "required": false,
+                "sensitive": false,
+                "type": "string"
+              },
+              "max_redirects": {
+                "computed": true,
+                "description": "Maximum number of redirects to follow",
+                "optional": true,
+                "required": false,
+                "sensitive": false,
+                "type": "number"
+              },
+              "max_retries": {
+                "computed": true,
+                "description": "Maximum number of retries",
+                "optional": true,
+                "required": false,
+                "sensitive": false,
+                "type": "number"
+              },
+              "method": {
+                "computed": true,
+                "description": "HTTP method",
+                "optional": true,
+                "required": false,
+                "sensitive": false,
+                "type": "string"
+              },
+              "name": {
+                "computed": false,
+                "description": "Friendly name",
+                "optional": false,
+                "required": true,
+                "sensitive": false,
+                "type": "string"
+              },
+              "notification_ids": {
+                "computed": false,
+                "description": "List of notification IDs",
+                "optional": true,
+                "required": false,
+                "sensitive": false,
+                "type": [
+                  "list",
+                  "number"
+                ]
+              },
+              "oauth_audience": {
+                "computed": false,
+                "description": "OAuth audience",
+                "optional": true,
+                "required": false,
+                "sensitive": false,
+                "type": "string"
+              },
+              "oauth_auth_method": {
+                "computed": false,
+                "description": "OAuth authentication method",
+                "optional": true,
+                "required": false,
+                "sensitive": false,
+                "type": "string"
+              },
+              "oauth_client_id": {
+                "computed": false,
+                "description": "OAuth client ID",
+                "optional": true,
+                "required": false,
+                "sensitive": false,
+                "type": "string"
+              },
+              "oauth_client_secret": {
+                "computed": false,
+                "description": "OAuth client secret. Stored in state; use `oauth_client_secret_wo` to keep it out of state.",
+                "optional": true,
+                "required": false,
+                "sensitive": true,
+                "type": "string"
+              },
+              "oauth_client_secret_wo": {
+                "computed": false,
+                "description": "OAuth client secret, write-only: sent to Uptime Kuma on create and update but never stored in plan or state. Requires Terraform 1.11 or OpenTofu 1.11 or later. Conflicts with `oauth_client_secret`; requires `oauth_client_secret_wo_version`. An imported resource has no `oauth_client_secret_wo_version` yet, so `terraform import` may store the server's value in `oauth_client_secret` until the next apply with `oauth_client_secret_wo` set removes it from state.",
+                "optional": true,
+                "required": false,
+                "sensitive": true,
+                "type": "string"
+              },
+              "oauth_client_secret_wo_version": {
+                "computed": false,
+                "description": "Any value that changes whenever `oauth_client_secret_wo` changes, for example a counter or a hash of the secret's encrypted source. A change triggers an update that sends the current `oauth_client_secret_wo`.",
+                "optional": true,
+                "required": false,
+                "sensitive": false,
+                "type": "string"
+              },
+              "oauth_scopes": {
+                "computed": false,
+                "description": "OAuth scopes",
+                "optional": true,
+                "required": false,
+                "sensitive": false,
+                "type": "string"
+              },
+              "oauth_token_url": {
+                "computed": false,
+                "description": "OAuth token URL",
+                "optional": true,
+                "required": false,
+                "sensitive": false,
+                "type": "string"
+              },
+              "parent": {
+                "computed": false,
+                "description": "Parent monitor ID for hierarchical organization",
+                "optional": true,
+                "required": false,
+                "sensitive": false,
+                "type": "number"
+              },
+              "proxy_id": {
+                "computed": false,
+                "description": "Proxy ID",
+                "optional": true,
+                "required": false,
+                "sensitive": false,
+                "type": "number"
+              },
+              "resend_interval": {
+                "computed": true,
+                "description": "Resend interval in seconds",
+                "optional": true,
+                "required": false,
+                "sensitive": false,
+                "type": "number"
+              },
+              "retry_interval": {
+                "computed": true,
+                "description": "Retry interval in seconds. Minimum 20, and like `interval` it has no upper bound since Uptime Kuma 2.5.0.",
+                "optional": true,
+                "required": false,
+                "sensitive": false,
+                "type": "number"
+              },
+              "tags": {
+                "computed": false,
+                "description": "Set of tags assigned to this monitor",
+                "nested_type": {
+                  "attributes": {
+                    "tag_id": {
+                      "computed": false,
+                      "description": "Tag ID",
+                      "optional": false,
+                      "required": true,
+                      "sensitive": false,
+                      "type": "number"
+                    },
+                    "value": {
+                      "computed": false,
+                      "description": "Optional value for this tag",
+                      "optional": true,
+                      "required": false,
+                      "sensitive": false,
+                      "type": "string"
+                    }
+                  },
+                  "nesting_mode": "set"
+                },
+                "optional": true,
+                "required": false,
+                "sensitive": false
+              },
+              "timeout": {
+                "computed": true,
+                "description": "Request timeout in seconds, at least 0.1. Fractional values are supported. Defaults to 48, the value the Uptime Kuma web UI assigns to a new monitor: 80% of the default 60 second `interval`. The floor exists because Uptime Kuma treats 0 or less as no timeout being set and substitutes a value derived from `interval` instead of using it as a timeout. The server enforces no upper bound, but saving the monitor in the web UI clamps the value to 80% of `interval`, so a monitor edited there afterwards can come back lowered.",
+                "optional": true,
+                "required": false,
+                "sensitive": false,
+                "type": "number"
+              },
+              "tls_ca": {
+                "computed": false,
+                "description": "TLS CA certificate",
+                "optional": true,
+                "required": false,
+                "sensitive": false,
+                "type": "string"
+              },
+              "tls_cert": {
+                "computed": false,
+                "description": "TLS client certificate",
+                "optional": true,
+                "required": false,
+                "sensitive": true,
+                "type": "string"
+              },
+              "tls_key": {
+                "computed": false,
+                "description": "TLS client key. Stored in state; use `tls_key_wo` to keep it out of state.",
+                "optional": true,
+                "required": false,
+                "sensitive": true,
+                "type": "string"
+              },
+              "tls_key_wo": {
+                "computed": false,
+                "description": "TLS client key, write-only: sent to Uptime Kuma on create and update but never stored in plan or state. Requires Terraform 1.11 or OpenTofu 1.11 or later. Conflicts with `tls_key`; requires `tls_key_wo_version`. An imported resource has no `tls_key_wo_version` yet, so `terraform import` may store the server's value in `tls_key` until the next apply with `tls_key_wo` set removes it from state.",
+                "optional": true,
+                "required": false,
+                "sensitive": true,
+                "type": "string"
+              },
+              "tls_key_wo_version": {
+                "computed": false,
+                "description": "Any value that changes whenever `tls_key_wo` changes, for example a counter or a hash of the secret's encrypted source. A change triggers an update that sends the current `tls_key_wo`.",
+                "optional": true,
+                "required": false,
+                "sensitive": false,
+                "type": "string"
+              },
+              "upside_down": {
+                "computed": true,
+                "description": "Invert monitor status (treat DOWN as UP and vice versa)",
+                "optional": true,
+                "required": false,
+                "sensitive": false,
+                "type": "bool"
+              },
+              "url": {
+                "computed": false,
+                "description": "URL to monitor",
+                "optional": false,
+                "required": true,
+                "sensitive": false,
+                "type": "string"
+              }
+            }
+          },
+          "version": 0
+        },
+        "uptimekuma_status_page": {
+          "block": {
+            "attributes": {
+              "analytics_id": {
+                "computed": false,
+                "description": "Site identifier passed to the analytics snippet. Its meaning depends on `analytics_type`: the gtag property ID for `google`, `data-website-id` for `umami`, `data-site-id` for `rybbit`, and the numeric site ID for `matomo`. For `plausible` it is `data-domain`, which is a comma separated list of domains rather than an ID. Uptime Kuma interpolates the `matomo` value into the snippet unquoted, so a non-numeric value there emits broken JavaScript.",
+                "optional": true,
+                "required": false,
+                "sensitive": false,
+                "type": "string"
+              },
+              "analytics_script_url": {
+                "computed": false,
+                "description": "Location of the analytics script, required by `umami`, `plausible`, `matomo` and `rybbit` and unused by `google`. For `umami`, `plausible` and `rybbit` this is the full script URL. For `matomo` it is the bare host of the Matomo installation (`matomo.example.com`), which Uptime Kuma expands into the tracker and script URLs itself; a value carrying a scheme or a path produces a broken snippet.",
+                "optional": true,
+                "required": false,
+                "sensitive": false,
+                "type": "string"
+              },
+              "analytics_type": {
+                "computed": false,
+                "description": "Analytics provider whose tracking snippet Uptime Kuma renders on the public status page. One of `google`, `umami`, `plausible`, `matomo`, `rybbit`. `google` requires `analytics_id`; every other type requires both `analytics_id` and `analytics_script_url`. When null, no snippet is rendered at all.",
+                "optional": true,
+                "required": false,
+                "sensitive": false,
+                "type": "string"
+              },
+              "custom_css": {
+                "computed": false,
+                "description": "Custom CSS styling",
+                "optional": true,
+                "required": false,
+                "sensitive": false,
+                "type": "string"
+              },
+              "description": {
+                "computed": false,
+                "description": "Status page description",
+                "optional": true,
+                "required": false,
+                "sensitive": false,
+                "type": "string"
+              },
+              "domain_name_list": {
+                "computed": false,
+                "description": "Custom domain names",
+                "optional": true,
+                "required": false,
+                "sensitive": false,
+                "type": [
+                  "list",
+                  "string"
+                ]
+              },
+              "footer_text": {
+                "computed": false,
+                "description": "Footer content",
+                "optional": true,
+                "required": false,
+                "sensitive": false,
+                "type": "string"
+              },
+              "google_analytics_id": {
+                "computed": false,
+                "description": "Google Analytics tracking ID",
+                "optional": true,
+                "required": false,
+                "sensitive": false,
+                "type": "string"
+              },
+              "icon": {
+                "computed": false,
+                "description": "Icon for the status page. Accepts a PNG data URI (`data:image/png;base64,...`) or a URL/path (max 255 characters). When a data URI is provided, Uptime Kuma converts it to a file on disk.",
+                "optional": true,
+                "required": false,
+                "sensitive": false,
+                "type": "string"
+              },
+              "id": {
+                "computed": true,
+                "description": "Status page ID",
+                "optional": false,
+                "required": false,
+                "sensitive": false,
+                "type": "number"
+              },
+              "public_group_list": {
+                "computed": false,
+                "description": "Monitor grouping configuration",
+                "nested_type": {
+                  "attributes": {
+                    "id": {
+                      "computed": true,
+                      "description": "Public group ID",
+                      "optional": true,
+                      "required": false,
+                      "sensitive": false,
+                      "type": "number"
+                    },
+                    "monitor_list": {
+                      "computed": false,
+                      "description": "Monitors in group",
+                      "nested_type": {
+                        "attributes": {
+                          "id": {
+                            "computed": false,
+                            "description": "Monitor ID",
+                            "optional": false,
+                            "required": true,
+                            "sensitive": false,
+                            "type": "number"
+                          },
+                          "send_url": {
+                            "computed": false,
+                            "description": "Include monitor URL in status page",
+                            "optional": true,
+                            "required": false,
+                            "sensitive": false,
+                            "type": "bool"
+                          },
+                          "url": {
+                            "computed": false,
+                            "description": "Custom URL to use as the clickable link for this monitor on the status page, overriding the monitor's own check URL. Only takes effect when `send_url` is also set to `true`",
+                            "optional": true,
+                            "required": false,
+                            "sensitive": false,
+                            "type": "string"
+                          }
+                        },
+                        "nesting_mode": "list"
+                      },
+                      "optional": true,
+                      "required": false,
+                      "sensitive": false
+                    },
+                    "name": {
+                      "computed": false,
+                      "description": "Group display name",
+                      "optional": false,
+                      "required": true,
+                      "sensitive": false,
+                      "type": "string"
+                    },
+                    "weight": {
+                      "computed": false,
+                      "description": "Display order/weight",
+                      "optional": true,
+                      "required": false,
+                      "sensitive": false,
+                      "type": "number"
+                    }
+                  },
+                  "nesting_mode": "list"
+                },
+                "optional": true,
+                "required": false,
+                "sensitive": false
+              },
+              "published": {
+                "computed": true,
+                "description": "Public status page. Kuma's save handler does not support unpublishing; false is rejected.",
+                "optional": true,
+                "required": false,
+                "sensitive": false,
+                "type": "bool"
+              },
+              "show_certificate_expiry": {
+                "computed": true,
+                "description": "Show certificate expiry dates",
+                "optional": true,
+                "required": false,
+                "sensitive": false,
+                "type": "bool"
+              },
+              "show_powered_by": {
+                "computed": true,
+                "description": "Display 'Powered by Uptime Kuma'",
+                "optional": true,
+                "required": false,
+                "sensitive": false,
+                "type": "bool"
+              },
+              "show_tags": {
+                "computed": true,
+                "description": "Show monitor tags on status page",
+                "optional": true,
+                "required": false,
+                "sensitive": false,
+                "type": "bool"
+              },
+              "slug": {
+                "computed": false,
+                "description": "URL-friendly slug for the status page",
+                "optional": false,
+                "required": true,
+                "sensitive": false,
+                "type": "string"
+              },
+              "theme": {
+                "computed": false,
+                "description": "Theme name for styling",
+                "optional": true,
+                "required": false,
+                "sensitive": false,
+                "type": "string"
+              },
+              "title": {
+                "computed": false,
+                "description": "Display title",
+                "optional": false,
+                "required": true,
+                "sensitive": false,
+                "type": "string"
+              }
+            }
+          },
+          "version": 0
+        }
+      }
+    }
+  }
+}
