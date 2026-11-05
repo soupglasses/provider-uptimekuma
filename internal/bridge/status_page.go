@@ -58,6 +58,9 @@ func (r *statusPage) Read(ctx context.Context, req resource.ReadRequest, resp *r
 		return
 	}
 	model.Published = types.BoolValue(*snapshot.Config.Published)
+	if *snapshot.Config.Theme != "" || !model.Theme.IsNull() {
+		model.Theme = types.StringValue(*snapshot.Config.Theme)
+	}
 	model.ShowTags = types.BoolValue(*snapshot.Config.ShowTags)
 	model.ShowPoweredBy = types.BoolValue(*snapshot.Config.ShowPoweredBy)
 	model.ShowCertificateExpiry = types.BoolValue(*snapshot.Config.ShowCertificateExpiry)
@@ -112,10 +115,11 @@ func (b *publicBool) UnmarshalJSON(raw []byte) error {
 
 type pageSnapshot struct {
 	Config *struct {
-		Published             *bool `json:"published"`
-		ShowTags              *bool `json:"showTags"`
-		ShowPoweredBy         *bool `json:"showPoweredBy"`
-		ShowCertificateExpiry *bool `json:"showCertificateExpiry"`
+		Published             *bool   `json:"published"`
+		Theme                 *string `json:"theme"`
+		ShowTags              *bool   `json:"showTags"`
+		ShowPoweredBy         *bool   `json:"showPoweredBy"`
+		ShowCertificateExpiry *bool   `json:"showCertificateExpiry"`
 	} `json:"config"`
 	Groups []struct {
 		ID       int64  `json:"id"`
@@ -146,7 +150,7 @@ func readPage(ctx context.Context, endpoint, slug string) (pageSnapshot, error) 
 	if err = json.NewDecoder(io.LimitReader(response.Body, 2<<20)).Decode(&result); err != nil {
 		return result, fmt.Errorf("decode public page: %w", err)
 	}
-	if result.Config == nil || result.Config.Published == nil || result.Config.ShowTags == nil || result.Config.ShowPoweredBy == nil || result.Config.ShowCertificateExpiry == nil {
+	if result.Config == nil || result.Config.Theme == nil || result.Config.Published == nil || result.Config.ShowTags == nil || result.Config.ShowPoweredBy == nil || result.Config.ShowCertificateExpiry == nil {
 		return result, fmt.Errorf("public page response omitted required configuration flags")
 	}
 	if result.Groups == nil {

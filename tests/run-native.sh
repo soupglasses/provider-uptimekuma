@@ -22,9 +22,9 @@ import os, secrets
 with open(os.open(os.environ['KUMA_TEST_PASSWORD_FILE'], os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600), 'w') as f:
     f.write(secrets.token_urlsafe(36))
 PY
-"${engine[@]}" run --detach --name "$fixture" --publish 127.0.0.1::3001 --env UPTIME_KUMA_DB_TYPE=sqlite \
+port=$(python3 -c 'import socket; s=socket.socket(); s.bind(("127.0.0.1",0)); print(s.getsockname()[1]); s.close()')
+"${engine[@]}" run --detach --name "$fixture" --publish "127.0.0.1:$port:3001" --env UPTIME_KUMA_DB_TYPE=sqlite \
     --volume "$work_dir/data:/app/data" "$(cat tests/kuma-image.txt)" >/dev/null
-port=$("${engine[@]}" port "$fixture" 3001/tcp | head -1 | sed 's/.*://')
 export KUMA_TEST_ENDPOINT="http://127.0.0.1:$port"
 ready=0
 for ((i=0; i<90; i++)); do

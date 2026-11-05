@@ -111,7 +111,7 @@ func TestNativeResourcesAgainstKuma(t *testing.T) {
 	}
 
 	page := &api.StatusPage{ObjectMeta: metav1.ObjectMeta{Name: "page", Namespace: "status", UID: "crossplane-page-fixture"}}
-	page.Spec.ForProvider = api.StatusPageParameters{Slug: ptr("crossplane-fixture"), Title: ptr("Crossplane fixture"), Published: ptr(true), PublicGroupList: []api.PublicGroupListParameters{{Name: ptr("Services"), Weight: ptr(float64(1)), MonitorList: []api.MonitorListParameters{{ID: ptr(mustID(t, originalID)), SendURL: ptr(false)}}}}}
+	page.Spec.ForProvider = api.StatusPageParameters{Slug: ptr("crossplane-fixture"), Title: ptr("Crossplane fixture"), Theme: ptr("auto"), Published: ptr(true), PublicGroupList: []api.PublicGroupListParameters{{Name: ptr("Services"), Weight: ptr(float64(1)), MonitorList: []api.MonitorListParameters{{ID: ptr(mustID(t, originalID)), SendURL: ptr(false)}}}}}
 	ec = connect(page, "uptimekuma_status_page")
 	if _, err = ec.Observe(t.Context(), page); err != nil {
 		t.Fatal(err)
@@ -140,6 +140,7 @@ func TestNativeResourcesAgainstKuma(t *testing.T) {
 	}
 	remote.PublicGroupList = nil
 	remote.ShowTags = true
+	remote.Theme = "dark"
 	if _, err = editor.SaveStatusPage(t.Context(), remote); err != nil {
 		t.Fatal(err)
 	}
@@ -160,12 +161,18 @@ func TestNativeResourcesAgainstKuma(t *testing.T) {
 	}
 	defer request.Body.Close()
 	var public struct {
+		Config struct {
+			Theme string `json:"theme"`
+		} `json:"config"`
 		Groups []struct {
 			Monitors []any `json:"monitorList"`
 		} `json:"publicGroupList"`
 	}
 	if err = json.NewDecoder(request.Body).Decode(&public); err != nil {
 		t.Fatal(err)
+	}
+	if public.Config.Theme != "auto" {
+		t.Fatal("native update did not repair real page theme")
 	}
 	if len(public.Groups) != 1 || len(public.Groups[0].Monitors) != 1 {
 		t.Fatal("native update did not restore the real public page")
