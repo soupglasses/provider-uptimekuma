@@ -29,9 +29,11 @@ The ProviderConfig contains `endpoint`, `username` (or `usernameSecretRef`) and
 `passwordSecretRef`, whose selector contains `name` and `key`. These are normal Kuma
 login credentials. Prometheus API keys cannot manage monitors or status pages.
 The runtime reads Secrets directly rather than caching the namespace's Secrets.
-Use a separately managed service account and namespaced Role, as in
-`tests/provider.yaml`: Crossplane grants its automatically managed provider service
-accounts broad Secret permissions, independently of the CRDs' scope.
+Crossplane grants package-owned runtime Deployments broad Secret permissions even
+with a custom service account. The deployment example sets that generated runtime
+to zero replicas and runs the packaged image in an independently managed Deployment
+with a namespaced Role. This keeps Secret listing and cross-namespace access denied
+without changing RBAC for existing providers. See `tests/provider.yaml`.
 
 Unbound monitors are adopted by unique name and expected monitor type; pages use
 their unique slug. Ambiguous names fail closed. This recovers ownership even after

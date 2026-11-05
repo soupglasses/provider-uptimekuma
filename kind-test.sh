@@ -71,7 +71,7 @@ print(s)
 PY
 kubectl wait provider/uptimekuma --for=condition=Healthy --timeout=180s
 revision=$(kubectl get provider uptimekuma --output jsonpath='{.status.currentRevision}')
-kubectl rollout status --namespace crossplane-system deployment/"$revision" --timeout=120s
+kubectl rollout status --namespace crossplane-system deployment/uptimekuma-controller --timeout=120s
 for resource in providerconfigs gamemonitors httpmonitors statuspages; do
     [[ $(kubectl get crd "$resource.uptimekuma.ops.finnes.dev" --output jsonpath='{.spec.scope}') == Namespaced ]]
 done
@@ -152,8 +152,8 @@ spec:
           - {id: $http_id, sendUrl: false}
 CONFIG
 kubectl wait --namespace monitoring statuspage/public --for=condition=Ready --timeout=120s
-kubectl rollout restart deployment/"$revision" --namespace crossplane-system
-kubectl rollout status deployment/"$revision" --namespace crossplane-system --timeout=90s
+kubectl rollout restart deployment/uptimekuma-controller --namespace crossplane-system
+kubectl rollout status deployment/uptimekuma-controller --namespace crossplane-system --timeout=90s
 kubectl wait --namespace monitoring gamemonitor/minecraft httpmonitor/auth statuspage/public --for=condition=Synced --timeout=90s
 [[ $(kubectl get gamemonitor minecraft --namespace monitoring --output jsonpath='{.status.atProvider.id}') == "$game_id" ]]
 # Stop the entire control plane. External Kuma must still serve and take fresh samples.
