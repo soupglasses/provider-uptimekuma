@@ -1,0 +1,20 @@
+# SPDX-FileCopyrightText: 2026 Sofie Finnes <sofie+git@finnes.dev>
+# SPDX-License-Identifier: MPL-2.0
+apiVersion: uptimekuma.ops.finnes.dev/v1alpha1
+kind: GameMonitor
+metadata:
+  name: game-server
+  namespace: monitoring
+spec:
+  managementPolicies: [Observe, Create, Update, LateInitialize]
+  providerConfigRef:
+    kind: ProviderConfig
+    name: default
+  forProvider:
+    name: Game server
+    hostname: mc.example.org
+    port: 25565
+    game: minecraft
+    gamedigGivenPortOnly: true
+    interval: 60
+    active: true

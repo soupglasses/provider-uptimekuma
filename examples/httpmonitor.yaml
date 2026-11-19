@@ -1,0 +1,22 @@
+# SPDX-FileCopyrightText: 2026 Sofie Finnes <sofie+git@finnes.dev>
+# SPDX-License-Identifier: MPL-2.0
+apiVersion: uptimekuma.ops.finnes.dev/v1alpha1
+kind: HTTPMonitor
+metadata:
+  name: website
+  namespace: monitoring
+spec:
+  managementPolicies: [Observe, Create, Update, LateInitialize]
+  providerConfigRef:
+    kind: ProviderConfig
+    name: default
+  forProvider:
+    name: Website
+    url: https://www.example.org/
+    interval: 60
+    retryInterval: 60
+    maxRetries: 0
+    active: true
+    acceptedStatusCodes:
+      - 200-299
+    method: GET

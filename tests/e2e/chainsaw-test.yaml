@@ -1,0 +1,164 @@
+# SPDX-FileCopyrightText: 2026 Sofie Finnes <sofie+git@finnes.dev>
+# SPDX-License-Identifier: MPL-2.0
+apiVersion: chainsaw.kyverno.io/v1alpha1
+kind: Test
+metadata:
+  name: kuma-lifecycle
+spec:
+  namespace: monitoring
+  # The last step stops the cluster, so nothing could be deleted afterwards.
+  skipDelete: true
+  timeouts:
+    assert: 120s
+    exec: 120s
+  steps:
+    - name: installation
+      description: The APIs are namespaced, and the controller reads only its own credentials.
+      try:
+        - script:
+            shell: bash
+            content: |
+              set -euo pipefail
+              for resource in providerconfigs gamemonitors httpmonitors statuspages; do
+                  [[ $(kubectl get crd "$resource.uptimekuma.ops.finnes.dev" --output jsonpath='{.spec.scope}') == Namespaced ]]
+              done
+              identity=system:serviceaccount:crossplane-system:uptimekuma-controller
+              expect_permission() {
+                  local expected=$1 actual
+                  shift
+                  actual=$(kubectl auth can-i --as="$identity" "$@" 2>/dev/null || true)
+                  if [[ $actual != "$expected" ]]; then
+                      echo "expected $expected for $*; got $actual" >&2
+                      return 1
+                  fi
+              }
+              expect_permission yes get secret/kuma-credentials --namespace monitoring
+              expect_permission no list secrets --namespace monitoring
+              expect_permission no get secret/kuma-credentials --namespace default
+    - name: monitors-and-status-page
+      try:
+        - apply:
+            resource:
+              apiVersion: uptimekuma.ops.finnes.dev/v1alpha1
+              kind: HTTPMonitor
+              metadata:
+                name: auth
+              spec:
+                providerConfigRef:
+                  kind: ProviderConfig
+                  name: default
+                forProvider:
+                  name: Auth fixture
+                  url: http://127.0.0.1:3001
+                  interval: 20
+                  active: true
+        - apply:
+            resource:
+              apiVersion: uptimekuma.ops.finnes.dev/v1alpha1
+              kind: GameMonitor
+              metadata:
+                name: minecraft
+              spec:
+                providerConfigRef:
+                  kind: ProviderConfig
+                  name: default
+                forProvider:
+                  name: Minecraft
+                  hostname: mc.finnes.dev
+                  port: 25565
+                  game: minecraft
+                  gamedigGivenPortOnly: true
+                  interval: 20
+                  active: true
+        - assert:
+            resource:
+              apiVersion: uptimekuma.ops.finnes.dev/v1alpha1
+              kind: HTTPMonitor
+              metadata:
+                name: auth
+              status:
+                (conditions[?type == 'Ready'].status | [0]): "True"
+        - assert:
+            resource:
+              apiVersion: uptimekuma.ops.finnes.dev/v1alpha1
+              kind: GameMonitor
+              metadata:
+                name: minecraft
+              status:
+                (conditions[?type == 'Ready'].status | [0]): "True"
+        - script:
+            content: kubectl get gamemonitor minecraft --namespace monitoring --output json
+            outputs:
+              - name: gameId
+                value: (to_number(json_parse($stdout).status.atProvider.id))
+        - script:
+            content: kubectl get httpmonitor auth --namespace monitoring --output json
+            outputs:
+              - name: httpId
+                value: (to_number(json_parse($stdout).status.atProvider.id))
+        - apply:
+            resource:
+              apiVersion: uptimekuma.ops.finnes.dev/v1alpha1
+              kind: StatusPage
+              metadata:
+                name: public
+              spec:
+                providerConfigRef:
+                  kind: ProviderConfig
+                  name: default
+                forProvider:
+                  slug: crossplane-fixture
+                  title: Status fixture
+                  published: true
+                  publicGroupList:
+                    - name: Services
+                      weight: 1
+                      monitorList:
+                        - id: ($gameId)
+                          sendUrl: false
+                        - id: ($httpId)
+                          sendUrl: false
+        - assert:
+            resource:
+              apiVersion: uptimekuma.ops.finnes.dev/v1alpha1
+              kind: StatusPage
+              metadata:
+                name: public
+              status:
+                (conditions[?type == 'Ready'].status | [0]): "True"
+    - name: controller-restart
+      description: A restarted controller recovers the same monitors instead of creating new ones.
+      try:
+        - script:
+            shell: bash
+            timeout: 4m
+            content: |
+              set -euo pipefail
+              game_id=$(kubectl get gamemonitor minecraft --namespace monitoring --output jsonpath='{.status.atProvider.id}')
+              kubectl rollout restart deployment/uptimekuma-controller --namespace crossplane-system
+              kubectl rollout status deployment/uptimekuma-controller --namespace crossplane-system --timeout=90s
+              kubectl wait --namespace monitoring gamemonitor/minecraft httpmonitor/auth statuspage/public \
+                  --for=condition=Synced --timeout=90s
+              [[ $(kubectl get gamemonitor minecraft --namespace monitoring --output jsonpath='{.status.atProvider.id}') == "$game_id" ]]
+    - name: control-plane-outage
+      description: Kuma keeps serving the status page and taking fresh samples while all of Kubernetes
+        is down.
+      try:
+        - script:
+            shell: bash
+            timeout: 2m
+            content: |
+              set -euo pipefail
+              http_id=$(kubectl get httpmonitor auth --namespace monitoring --output jsonpath='{.status.atProvider.id}')
+              endpoint="http://$(docker port "${KIND_CLUSTER_NAME:?}-kuma" 3001/tcp | head -1)"
+              outage_start=$(date +%s)
+              docker stop "$KIND_CLUSTER_NAME-control-plane" >/dev/null
+              sleep 25
+              curl --silent --fail "$endpoint/api/status-page/crossplane-fixture?verify=offline" |
+                  jq --exit-status '.publicGroupList[0].monitorList | length == 2' >/dev/null
+              curl --silent --fail "$endpoint/api/status-page/heartbeat/crossplane-fixture?verify=offline" |
+                  jq --exit-status --arg id "$http_id" --argjson start "$outage_start" --argjson now "$(date +%s)" '
+                      .heartbeatList[$id][-1] as $beat
+                      | ($beat.time | sub("\\.[0-9]+"; "") | sub(" "; "T") | sub("Z$"; "") + "Z" | fromdateiso8601) as $time
+                      | $beat.status == 1 and $now - $time < 30 and $time > $start' >/dev/null
+              echo 'External status page and fresh healthy HTTP samples survive a complete Kubernetes outage.'

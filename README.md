@@ -62,8 +62,12 @@ and CRDs from the embedded provider. The generator tools are pinned in `Dockerfi
 credential. It exercises native resource creation, adoption after discarding
 Kubernetes status, public-page drift detection and repair, convergence and deletion.
 Set `CONTAINER_ENGINE='sudo -n podman'` to run the fixture using rootful Podman.
-`kind-test.sh` verifies installation and reconciliation of the packaged controller
-under restricted Pod Security Admission in a disposable cluster.
+`mise run e2e` builds the package and verifies installation and reconciliation of the
+packaged controller under restricted Pod Security Admission in a disposable cluster.
+[uptest](https://github.com/crossplane/uptest) applies the examples listed in `e2e.sh`.
+The [Chainsaw](https://kyverno.github.io/chainsaw/) suite in `tests/e2e`
+checks controller permissions, monitor recovery after a controller restart, and that the
+status page keeps serving fresh samples while the whole cluster is stopped.
 
 CI verifies generated output, runs both integration layers and publishes the native
 package only from main. Existing production state is not a test fixture.
