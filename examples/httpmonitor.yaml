@@ -1,6 +1,6 @@
 # SPDX-FileCopyrightText: 2026 Sofie Finnes <sofie+git@finnes.dev>
 # SPDX-License-Identifier: MPL-2.0
-apiVersion: uptimekuma.ops.finnes.dev/v1alpha1
+apiVersion: uptimekuma.finnes.dev/v1alpha1
 kind: HTTPMonitor
 metadata:
   name: website

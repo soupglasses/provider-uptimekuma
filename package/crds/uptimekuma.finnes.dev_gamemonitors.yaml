@@ -3,9 +3,9 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.23.0
-  name: gamemonitors.uptimekuma.ops.finnes.dev
+  name: gamemonitors.uptimekuma.finnes.dev
 spec:
-  group: uptimekuma.ops.finnes.dev
+  group: uptimekuma.finnes.dev
   names:
     categories:
       - crossplane

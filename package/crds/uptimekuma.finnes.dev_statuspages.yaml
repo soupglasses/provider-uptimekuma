@@ -3,9 +3,9 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.23.0
-  name: statuspages.uptimekuma.ops.finnes.dev
+  name: statuspages.uptimekuma.finnes.dev
 spec:
-  group: uptimekuma.ops.finnes.dev
+  group: uptimekuma.finnes.dev
   names:
     categories:
       - crossplane

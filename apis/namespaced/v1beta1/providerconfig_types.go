@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MPL-2.0
 
 // +kubebuilder:object:generate=true
-// +groupName=uptimekuma.ops.finnes.dev
+// +groupName=uptimekuma.finnes.dev
 package v1beta1
 
 import (
@@ -40,7 +40,7 @@ type ProviderConfigList struct {
 	Items           []ProviderConfig `json:"items"`
 }
 
-var SchemeBuilder = &scheme.Builder{GroupVersion: schema.GroupVersion{Group: "uptimekuma.ops.finnes.dev", Version: "v1beta1"}}
+var SchemeBuilder = &scheme.Builder{GroupVersion: schema.GroupVersion{Group: "uptimekuma.finnes.dev", Version: "v1beta1"}}
 var AddToScheme = SchemeBuilder.AddToScheme
 
 func init() { SchemeBuilder.Register(&ProviderConfig{}, &ProviderConfigList{}) }

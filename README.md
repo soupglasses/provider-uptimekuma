@@ -15,7 +15,7 @@ backend is required. Configure and update resource manifests through Git and Flu
 
 ## APIs and ownership
 
-`uptimekuma.ops.finnes.dev/v1alpha1` provides `HTTPMonitor`, `GameMonitor` and
+`uptimekuma.finnes.dev/v1alpha1` provides `HTTPMonitor`, `GameMonitor` and
 `StatusPage`. `GameMonitor` uses Kuma's native GameDig implementation, including
 Minecraft Server List Ping. It does not reduce game health to TCP connectivity.
 
