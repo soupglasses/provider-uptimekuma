@@ -68,4 +68,4 @@ func WithSchema(raw []byte, group string) *ujconfig.Provider {
 	p.ConfigureResources()
 	return p
 }
-func Namespaced() *ujconfig.Provider { return WithSchema(providerSchema, "uptimekuma.ops.finnes.dev") }
+func Namespaced() *ujconfig.Provider { return WithSchema(providerSchema, "uptimekuma.finnes.dev") }

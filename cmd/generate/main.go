@@ -64,5 +64,5 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	pipeline.Run(localconfig.WithSchema(raw, "uptimekuma.cluster.finnes.dev"), localconfig.WithSchema(raw, "uptimekuma.ops.finnes.dev"), root)
+	pipeline.Run(localconfig.WithSchema(raw, "uptimekuma.cluster.finnes.dev"), localconfig.WithSchema(raw, "uptimekuma.finnes.dev"), root)
 }

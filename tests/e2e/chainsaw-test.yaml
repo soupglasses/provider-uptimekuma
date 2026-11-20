@@ -20,7 +20,7 @@ spec:
             content: |
               set -euo pipefail
               for resource in providerconfigs gamemonitors httpmonitors statuspages; do
-                  [[ $(kubectl get crd "$resource.uptimekuma.ops.finnes.dev" --output jsonpath='{.spec.scope}') == Namespaced ]]
+                  [[ $(kubectl get crd "$resource.uptimekuma.finnes.dev" --output jsonpath='{.spec.scope}') == Namespaced ]]
               done
               identity=system:serviceaccount:crossplane-system:uptimekuma-controller
               expect_permission() {
@@ -39,7 +39,7 @@ spec:
       try:
         - apply:
             resource:
-              apiVersion: uptimekuma.ops.finnes.dev/v1alpha1
+              apiVersion: uptimekuma.finnes.dev/v1alpha1
               kind: HTTPMonitor
               metadata:
                 name: auth
@@ -54,7 +54,7 @@ spec:
                   active: true
         - apply:
             resource:
-              apiVersion: uptimekuma.ops.finnes.dev/v1alpha1
+              apiVersion: uptimekuma.finnes.dev/v1alpha1
               kind: GameMonitor
               metadata:
                 name: minecraft
@@ -72,7 +72,7 @@ spec:
                   active: true
         - assert:
             resource:
-              apiVersion: uptimekuma.ops.finnes.dev/v1alpha1
+              apiVersion: uptimekuma.finnes.dev/v1alpha1
               kind: HTTPMonitor
               metadata:
                 name: auth
@@ -80,7 +80,7 @@ spec:
                 (conditions[?type == 'Ready'].status | [0]): "True"
         - assert:
             resource:
-              apiVersion: uptimekuma.ops.finnes.dev/v1alpha1
+              apiVersion: uptimekuma.finnes.dev/v1alpha1
               kind: GameMonitor
               metadata:
                 name: minecraft
@@ -98,7 +98,7 @@ spec:
                 value: (to_number(json_parse($stdout).status.atProvider.id))
         - apply:
             resource:
-              apiVersion: uptimekuma.ops.finnes.dev/v1alpha1
+              apiVersion: uptimekuma.finnes.dev/v1alpha1
               kind: StatusPage
               metadata:
                 name: public
@@ -120,7 +120,7 @@ spec:
                           sendUrl: false
         - assert:
             resource:
-              apiVersion: uptimekuma.ops.finnes.dev/v1alpha1
+              apiVersion: uptimekuma.finnes.dev/v1alpha1
               kind: StatusPage
               metadata:
                 name: public

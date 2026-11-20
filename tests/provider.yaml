@@ -74,7 +74,7 @@ metadata:
   namespace: monitoring
 rules:
   - apiGroups:
-      - uptimekuma.ops.finnes.dev
+      - uptimekuma.finnes.dev
     resources:
       - providerconfigs
       - gamemonitors
